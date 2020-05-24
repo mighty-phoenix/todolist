@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>To-do List</title>
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link data-require="bootstrap@3.3.6" data-semver="4.1.3" rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" />
+    <script data-require="bootstrap@3.3.6" data-semver="4.1.3" src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script>
+      function sortingList(a,b) {
+        var cint=parseInt(a.textContent.substr(0,a.textContent.indexOf(' ')));
+        var dint=parseInt(b.textContent.substr(0,a.textContent.indexOf(' ')));
+        if(cint<dint)
+          return -1;
+        else
+          return 1;
+      }
+
+      function fixNumbering(n) {
+        for(var i=0;i<$('ul li:not(.active)').length;i++) {
+          if (parseInt($('ul li:not(.active)').sort(sortingList)[i].textContent)>n) {
+            $('ul li:not(.active)').sort(sortingList)[i].firstChild.textContent = String(parseInt($('ul li:not(.active)').sort(sortingList)[i].textContent)-1)+$('ul li:not(.active)').sort(sortingList)[i].textContent.substr($('ul li:not(.active)').sort(sortingList)[i].textContent.indexOf('.'));
+          }
+        }
+      }
+
+      // This is the sorting function
+      function sortUnorderedList(ul) {
+      var lis = $('#'+ul+' li');
+      var vals = ['-1. '];
+      var l = lis.length;
+      for(var i = 1; i < l; i++)
+      vals.push(lis[i].innerHTML);
+      vals.sort(function(a,b) {
+      var cint=parseInt(a.substr(0,a.indexOf(' ')));
+      var dint=parseInt(b.substr(0,a.indexOf(' ')));
+      if(cint<dint)
+      return -1;
+      else
+      return 1;
+      });
+      // Change the list on the page
+      for(var i = 1; i < l; i++)
+      lis[i].innerHTML = vals[i];
+      }
+      
+      //Animation effects
+      $(function(){
+      $("h1").animate({
+      left: $("h1").parent().width()/2 - $("h1").width()/2
+      }, "slow");
+      
+      $("h2").animate({
+      left: $("h2").parent().width()/2 - $("h2").width()/2
+      }, "slow");
+      
+      $("p").animate({
+      left: $("p").parent().width()/2 - $("p").width()/2
+      }, "slow");
+      
+      //Adding event listener for addition of new tasks on clicking the submit button.
+      $('#taskBtn').click(function() {
+      
+      var newTask = $('#taskInputText').val();
+      
+      if(newTask !== '') {
+      
+        var count = $("#taskListSection").children().length + $("#taskDoneListSection").children().length - 1;
+        
+        $('#taskListSection').append('<li id="task-' + count + '" class="list-group-item striketask bg-success">' + count + '. ' + newTask + '<button id="delete-'+count+'" class="btn btn-danger btn-sm rounded-2" onclick="event.stopPropagation();fixNumbering(parseInt($(this).parent().text().substr(0,$(this).parent().text().indexOf(\' \'))));$(this).parent().remove();" type="button" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa fa-trash"></i></button></li>');
+       
+        $('#taskInputText').val('');
+        $('#task-'+count).on('click', function strike(){
+          $('#taskDoneListSection').append(this);
+          $(this).addClass("unstriketask");
+          $(this).removeClass("striketask");
+          sortUnorderedList("taskDoneListSection");
+          $(this).wrap("<strike>");
+          $(this).unbind("click").bind("click",function(){
+            $(this).unwrap();
+            $(this).addClass("striketask");
+            $(this).removeClass("unstriketask");
+            $(this).unbind("click").bind("click", strike);
+            $('#taskListSection').append(this);
+            sortUnorderedList("taskListSection");
+          });
+        });
+      
+        setTimeout(function(){
+          $('#taskListSection li.bg-success').removeClass('bg-success');
+        },500); 
+      
+      } else {
+        alert('Please specify the title of the task.');   
+      }
+      });  
+      });
+      
+      $( document ).ready(function() {
+      // Prepopulating the To-do list using data.json
+      $.ajax({
+      headers: {
+      'Access-Control-Allow-Origin': '*',
+      },
+      type: 'GET',
+      contentType: 'application/json',
+      url: 'data.json',
+      dataType: 'json',
+      success: function(data) {
+      for(var i=0;i<data["taskList"].length;i++) {
+        $('#taskListSection').append(data["taskList"][i]);
+        $('#task-'+(i+1)).on('click', function strike(){
+          $('#taskDoneListSection').append(this);
+          $(this).addClass("unstriketask");
+          $(this).removeClass("striketask");
+          sortUnorderedList("taskDoneListSection");
+          $(this).wrap("<strike>");
+          $(this).unbind("click").bind("click",function(){
+            $(this).unwrap();
+            $(this).addClass("striketask");
+            $(this).removeClass("unstriketask");
+            $(this).unbind("click").bind("click", strike);
+            $('#taskListSection').append(this);
+            sortUnorderedList("taskListSection");
+          });
+        });
+      }
+      for(var i=5;i<5+data["taskDoneList"].length;i++) {
+        $('#taskDoneListSection').append(data["taskDoneList"][i-5]);
+        $('#task-'+i).wrap("<strike>")
+        $('#task-'+i).on('click', function unstrike(){
+          $(this).unwrap();
+          $(this).addClass("striketask");
+          $(this).removeClass("unstriketask");
+          $('#taskListSection').append(this);
+          sortUnorderedList("taskListSection");
+          $(this).unbind("click").bind("click",function(){
+            $(this).addClass("unstriketask");
+            $(this).removeClass("striketask");
+            $(this).unbind("click").bind("click", unstrike);
+            $('#taskDoneListSection').append(this);
+            $(this).wrap("<strike>");
+            sortUnorderedList("taskDoneListSection");
+          });
+        });
+      }
+      }
+      });
+      });
+    </script>
+  </head>
+  <body>
+    <div class="col-md-12">
+      <div>
+        <h1>Codex.Rocks!</h1>
+      </div>
+      <div>
+        <h2>To-do list</h2>
+      </div>
+      <div>
+        <p style="font-weight: bold;">Note: Click on the task rows to mark as done/to-do.</p>
+      </div>
+      <div data-role="content">
+        <ul class="list-group" id="taskListSection">
+          <li class="list-group-item active">To-dos</li>
+        </ul>
+        <ul class="list-group" id="taskDoneListSection">
+          <li class="list-group-item active">Tasks done</li>
+        </ul>
+        <br />
+        <fieldset class="ui-grid-a">
+          <div class="ui-block-a">
+            <textarea placeholder="Enter task" id="taskInputText" cols="50" maxlength="128"></textarea>
+          </div>
+          <div class="ui-block-b">
+            <input type="button" class="btn btn-success" value="Submit" id="taskBtn" />
+          </div>
+        </fieldset>
+      </div>
+    </div>
+  </body>
+</html>
+

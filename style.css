@@ -1,0 +1,82 @@
+
+
+body {
+  background-color: beige;
+}
+
+h1 {
+  display: inline-block;
+  position: relative;
+}
+
+h2 {
+  display: inline-block;
+  position: relative;
+}
+
+p {
+  display: inline-block;
+  position: relative;
+}
+
+.striketask {
+  background-color: green;
+}
+
+.unstriketask {
+  background-color: red;
+}
+
+.list-group-item {
+  color: white;
+}
+
+#taskBtn {
+  display: block;
+  margin: auto;
+  margin-top: 10px;
+}
+
+#taskDoneListSection {
+  max-width: 800px;
+  margin: auto;
+}
+
+#taskListSection {
+  max-width: 800px;
+  margin: auto;
+}
+
+.btn-danger {
+  margin-left: 10px;
+  z-index: 1;
+  position: relative;
+}
+
+.active {
+  text-align: center;
+  font-weight: bold;
+}
+
+textarea {
+  display: block;
+  margin: auto;
+  width: 600px;
+  height: 120px;
+  background-color: beige;
+  border: solid 3px orange;
+  border-radius: 10px;
+  padding: 5px;
+}
+
+textarea:focus {
+  border: :10px solid burlywood;
+  background-color: burlywood;
+}
+
+@media(max-width: 600px) {
+  textarea {
+    width: 100%;
+  }
+}
+
